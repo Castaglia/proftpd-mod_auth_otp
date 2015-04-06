@@ -139,7 +139,6 @@ static int auth_otp_kbdint_close(sftp_kbdint_driver_t *driver) {
 
   return 0;
 }
-
 #endif /* HAVE_SFTP */
 
 static int check_otp_code(pool *p, const char *user, const char *user_otp,
@@ -225,7 +224,7 @@ static int update_otp_counter(pool *p, const char *user,
 /* Sets the auth_otp_auth_code variable upon failure. */
 static int handle_user_otp(pool *p, const char *user, const char *user_otp,
     int authoritative) {
-  int res;
+  int res = 0;
   const unsigned char *secret = NULL;
   size_t secret_len = 0;
   unsigned long counter = 0, *counter_ptr = NULL, next_counter = 0;
@@ -439,6 +438,8 @@ MODRET auth_otp_auth(cmd_rec *cmd) {
         /* Indicate HANDLED. */
         res = 1;
       }
+    } else {
+      res = handle_user_otp(cmd->tmp_pool, user, user_otp, authoritative);
     }
 
   } else {
