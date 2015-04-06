@@ -32,7 +32,7 @@
 /* Max number of attempts for lock requests */
 #define AUTH_OTP_MAX_LOCK_ATTEMPTS	10
 
-static const char *trace_channel = "auth_otp.db";
+static const char *trace_channel = "auth_otp";
 
 static char *db_get_name(pool *p, const char *name) {
   cmdtable *cmdtab;
