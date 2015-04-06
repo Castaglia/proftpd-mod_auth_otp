@@ -140,25 +140,8 @@ sub auth_otp_sftp_hotp_login {
 
   if (open(my $fh, "> $db_script")) {
     print $fh <<EOS;
-CREATE TABLE users (
-  userid TEXT,
-  passwd TEXT,
-  uid INTEGER,
-  gid INTEGER,
-  homedir TEXT,
-  shell TEXT
-);
-INSERT INTO users (userid, passwd, uid, gid, homedir, shell) VALUES ('$setup->{user}', '$setup->{passwd}', $setup->{uid}, $setup->{gid}, '$setup->{home_dir}', '/bin/bash');
-
-CREATE TABLE groups (
-  groupname TEXT,
-  gid INTEGER,
-  members TEXT
-);
-INSERT INTO groups (groupname, gid, members) VALUES ('$setup->{group}', $setup->{gid}, '$setup->{user}');
-
 CREATE TABLE auth_otp (
-  user TEXT,
+  user TEXT PRIMARY KEY,
   secret TEXT,
   counter INTEGER
 );
@@ -317,25 +300,8 @@ sub auth_otp_sftp_totp_login {
 
   if (open(my $fh, "> $db_script")) {
     print $fh <<EOS;
-CREATE TABLE users (
-  userid TEXT,
-  passwd TEXT,
-  uid INTEGER,
-  gid INTEGER,
-  homedir TEXT,
-  shell TEXT
-);
-INSERT INTO users (userid, passwd, uid, gid, homedir, shell) VALUES ('$setup->{user}', '$setup->{passwd}', $setup->{uid}, $setup->{gid}, '$setup->{home_dir}', '/bin/bash');
-
-CREATE TABLE groups (
-  groupname TEXT,
-  gid INTEGER,
-  members TEXT
-);
-INSERT INTO groups (groupname, gid, members) VALUES ('$setup->{group}', $setup->{gid}, '$setup->{user}');
-
 CREATE TABLE auth_otp (
-  user TEXT,
+  user TEXT PRIMARY KEY,
   secret TEXT,
   counter INTEGER
 );
