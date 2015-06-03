@@ -91,7 +91,7 @@ static int auth_otp_kbdint_open(sftp_kbdint_driver_t *driver,
 
 static int auth_otp_kbdint_authenticate(sftp_kbdint_driver_t *driver,
     const char *user) {
-  int authoritative = FALSE;
+  int authoritative = FALSE, res;
   sftp_kbdint_challenge_t *challenge;
   unsigned int recvd_count = 0;
   const char **recvd_responses = NULL, *user_otp = NULL;
@@ -102,9 +102,11 @@ static int auth_otp_kbdint_authenticate(sftp_kbdint_driver_t *driver,
 
   challenge = pcalloc(driver->driver_pool, sizeof(sftp_kbdint_challenge_t));
   challenge->challenge = pstrdup(driver->driver_pool, "Verification code: ");
+
+  /* This MUST be set to FALSE, in order to receive the code from the client. */
   challenge->display_response = FALSE;
 
-  if (sftp_kbdint_send_challenge(user, NULL, 1, challenge) < 0) {
+  if (sftp_kbdint_send_challenge(NULL, NULL, 1, challenge) < 0) {
     pr_trace_msg(trace_channel, 3,
       "error sending keyboard-interactive challenges: %s", strerror(errno));
     return -1;
@@ -118,8 +120,13 @@ static int auth_otp_kbdint_authenticate(sftp_kbdint_driver_t *driver,
   }
 
   user_otp = recvd_responses[0];
-  (void) handle_user_otp(driver->driver_pool, user, user_otp, authoritative);
-  return 0;
+  res = handle_user_otp(driver->driver_pool, user, user_otp, authoritative);
+  if (res == 1) {
+    return 0;
+  }
+
+  errno = EPERM;
+  return -1;
 }
 
 static int auth_otp_kbdint_close(sftp_kbdint_driver_t *driver) {
@@ -228,6 +235,14 @@ static int handle_user_otp(pool *p, const char *user, const char *user_otp,
   const unsigned char *secret = NULL;
   size_t secret_len = 0;
   unsigned long counter = 0, *counter_ptr = NULL, next_counter = 0;
+
+  if (user_otp == NULL ||
+      (strlen(user_otp) == 0)) {
+    pr_trace_msg(trace_channel, 1,
+      "no OTP code provided by user, rejecting");
+    auth_otp_auth_code = PR_AUTH_BADPWD;
+    return -1;
+  }
 
   switch (auth_otp_algo) {
     case AUTH_OTP_ALGO_TOTP_SHA1:
