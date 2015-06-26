@@ -189,7 +189,7 @@ EOS
     ScoreboardFile => $setup->{scoreboard_file},
     SystemLog => $setup->{log_file},
     TraceLog => $setup->{log_file},
-    Trace => 'ssh2:20 auth_otp:20',
+    Trace => 'ssh2:20 sftp:20 auth_otp:20',
 
     AuthUserFile => $setup->{auth_user_file},
     AuthGroupFile => $setup->{auth_group_file},
