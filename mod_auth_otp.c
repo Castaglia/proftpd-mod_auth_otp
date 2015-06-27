@@ -36,7 +36,7 @@
 /* mod_auth_otp option flags */
 #define AUTH_OTP_OPT_STANDARD_RESPONSE		0x001
 #define AUTH_OTP_OPT_REQUIRE_TABLE_ENTRY	0x002
-#define AUTH_OTP_OPT_DISPLAY_CODE		0x004
+#define AUTH_OTP_OPT_DISPLAY_VERIFICATION_CODE	0x004
 
 /* From src/response.c */
 extern pr_response_t *resp_list;
@@ -105,7 +105,7 @@ static int auth_otp_kbdint_authenticate(sftp_kbdint_driver_t *driver,
   challenge->challenge = pstrdup(driver->driver_pool, "Verification code: ");
   challenge->display_response = FALSE;
 
-  if (auth_otp_opts & AUTH_OTP_OPT_DISPLAY_CODE) {
+  if (auth_otp_opts & AUTH_OTP_OPT_DISPLAY_VERIFICATION_CODE) {
     challenge->display_response = TRUE;
   }
 
@@ -610,8 +610,8 @@ MODRET set_authotpoptions(cmd_rec *cmd) {
     } else if (strcmp(cmd->argv[i], "RequireTableEntry") == 0) {
       opts |= AUTH_OTP_OPT_REQUIRE_TABLE_ENTRY;
 
-    } else if (strcmp(cmd->argv[i], "DisplayCode") == 0) {
-      opts |= AUTH_OTP_OPT_DISPLAY_CODE;
+    } else if (strcmp(cmd->argv[i], "DisplayVerificationCode") == 0) {
+      opts |= AUTH_OTP_OPT_DISPLAY_VERIFICATION_CODE;
 
     } else {
       CONF_ERROR(cmd, pstrcat(cmd->tmp_pool, ": unknown AuthOTPOption: '",
