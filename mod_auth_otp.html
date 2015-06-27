@@ -134,6 +134,18 @@ For example:
 <p>
 The currently implemented options are:
 <ul>
+  <li><code>DisplayCode</code><br>
+    When <code>mod_auth_otp</code> prompts the end user for the OTP code,
+    it requests that the client <b>not</b> echo/display the verification code
+    as it is entered by the user.  In some cases, however, administrators
+    may wish to have the OTP code be displayed.  For these situations, use
+    this option, <i>e.g.</i>:
+    <pre>
+      AuthOTPOptions DisplayCode
+    </pre>
+  </li>
+
+  <p>
   <li><code>RequireTableEntry</code><br>
     <p>
     When <code>mod_auth_otp</code> requests information for a user from the
