@@ -26,8 +26,9 @@ For those wishing to learn more about these one-time password algorithms, see:
   <li><a href="http://www.faqs.org/rfcs/rfc4226.html">HOTP: An HMAC-Based One-Time Password Algorithm (RFC 4226)</a>
   <li><a href="http://www.faqs.org/rfcs/rfc6238.html">TOTP: Time-Based One-Time Password Algorithm(RFC 6238)</a>
 </ul>
-Note that <a href="http://en.wikipedia.org/wiki/Google_Authenticator">Google Authenticator</code> is based on the TOTP algorithm; <code>mod_auth_otp</code>
-thus enables use of Google Authenticator for proftpd authentication.
+Note that <a href="http://en.wikipedia.org/wiki/Google_Authenticator"><code>Google Authenticator</code></a> is based on the TOTP algorithm;
+<code>mod_auth_otp</code> thus enables use of Google Authenticator for ProFTPD
+authentication.
 
 <p>
 Installation instructions are discussed <a href="#Installation">here</a>;
@@ -72,10 +73,10 @@ host.
 <p>
 The list of supported algorithm names is:
 <ul>
-  <li>hotp (counter-based codes)
-  <li>totp (time-based codes, using HMAC-SHA1)
-  <li>totp-sha256 (time-based codes, using HMAC-SHA256)
-  <li>totp-sha512 (time-based codes, using HMAC-SHA512)
+  <li><code>hotp</code> (counter-based codes)
+  <li><code>totp</code> (time-based codes, using HMAC-SHA1)
+  <li><code>totp-sha256</code> (time-based codes, using HMAC-SHA256)
+  <li><code>totp-sha512</code> (time-based codes, using HMAC-SHA512)
 </ul>
 The default algorithm is "totp".
 
@@ -135,8 +136,8 @@ For example:
 The currently implemented options are:
 <ul>
   <li><code>DisplayVerificationCode</code><br>
-    When <code>mod_auth_otp</code> prompts the end user for the OTP code,
-    it requests that the client <b>not</b> echo/display the verification code
+    When <code>mod_auth_otp</code> prompts the user for the OTP code, it
+    requests that the client <b>not</b> echo/display the verification code
     as it is entered by the user.  In some cases, however, administrators
     may wish to have the OTP code be displayed.  For these situations, use
     this option, <i>e.g.</i>:
@@ -177,7 +178,7 @@ The currently implemented options are:
     expectation of a one-time password:
     <pre>
       331 One-time password required for <i>user</i>
-    <pre>
+    </pre>
     However, this change of the response message "leaks" information about
     the server configuration, <i>i.e.</i> that OTPs will be used.  To
     tell <code>mod_auth_otp</code> to continue using the standard/normal
