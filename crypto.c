@@ -1,6 +1,6 @@
 /*
  * ProFTPD - mod_auth_otp OpenSSL interface
- * Copyright (c) 2015 TJ Saunders
+ * Copyright (c) 2015-2016 TJ Saunders
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,9 @@ void auth_otp_crypto_free(int flags) {
    * At the moment, the modules known to use OpenSSL are mod_ldap,
    * mod_sftp, mod_sql, and mod_sql_passwd, and mod_tls.
    */
-  if (pr_module_get("mod_ldap.c") == NULL &&
+  if (pr_module_get("mod_digest.c") == NULL &&
+      pr_module_get("mod_ldap.c") == NULL &&
+      pr_module_get("mod_proxy.c") == NULL &&
       pr_module_get("mod_radius.c") == NULL &&
       pr_module_get("mod_sftp.c") == NULL &&
       pr_module_get("mod_sql.c") == NULL &&
