@@ -194,7 +194,8 @@ static int check_otp_code(pool *p, const char *user, const char *user_otp,
     "computed code '%s', client sent code '%s'", code_str, user_otp);
 
   res = pr_auth_check(p, code_str, user, user_otp);
-  if (res == PR_AUTH_OK) {
+  if (res == PR_AUTH_OK ||
+      res == PR_AUTH_RFC2228_OK) {
     return 0;
   }
  
@@ -443,7 +444,8 @@ MODRET auth_otp_auth(cmd_rec *cmd) {
        * this point in the session.
        */
 
-      if (auth_otp_auth_code != PR_AUTH_OK) {
+      if (auth_otp_auth_code != PR_AUTH_OK &&
+          auth_otp_auth_code != PR_AUTH_RFC2228_OK) {
         if (authoritative) {
           /* Indicate ERROR. */
           res = -1;
