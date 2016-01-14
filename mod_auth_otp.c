@@ -244,6 +244,8 @@ static int handle_user_otp(pool *p, const char *user, const char *user_otp,
       (strlen(user_otp) == 0)) {
     pr_trace_msg(trace_channel, 1,
       "no OTP code provided by user, rejecting");
+    (void) pr_log_writefile(auth_otp_logfd, MOD_AUTH_OTP_VERSION,
+      "FAILED: user '%s' did not provide OTP code", user);
     auth_otp_auth_code = PR_AUTH_BADPWD;
     return -1;
   }
@@ -298,6 +300,8 @@ static int handle_user_otp(pool *p, const char *user, const char *user_otp,
 
     if (authoritative) {
       if (auth_otp_opts & AUTH_OTP_OPT_REQUIRE_TABLE_ENTRY) {
+        (void) pr_log_writefile(auth_otp_logfd, MOD_AUTH_OTP_VERSION,
+          "FAILED: user '%s' does not have entry in OTP tables", user);
         auth_otp_auth_code = PR_AUTH_BADPWD;
         return -1;
       }
@@ -316,6 +320,9 @@ static int handle_user_otp(pool *p, const char *user, const char *user_otp,
   if (res == 0) {
     pr_memscrub((char *) secret, secret_len);
     
+    (void) pr_log_writefile(auth_otp_logfd, MOD_AUTH_OTP_VERSION,
+      "SUCCESS: user '%s' provided valid OTP code", user);
+
     /* XXX Update state with details about the expected OTP found,
      * e.g. for clock drift.
      */
@@ -355,6 +362,9 @@ static int handle_user_otp(pool *p, const char *user, const char *user_otp,
       "counter check SUCCEEDED for one counter window behind; client is "
       "out-of-sync");
  
+    (void) pr_log_writefile(auth_otp_logfd, MOD_AUTH_OTP_VERSION,
+      "SUCCESS: user '%s' provided valid OTP code", user);
+
     /* XXX Update state with details about the expected OTP found,
      * e.g. for clock drift, event counter increment, etc.
      *
@@ -388,6 +398,9 @@ static int handle_user_otp(pool *p, const char *user, const char *user_otp,
       "counter check SUCCEEDED for one counter window ahead; client is "
       "out-of-sync");
  
+    (void) pr_log_writefile(auth_otp_logfd, MOD_AUTH_OTP_VERSION,
+      "SUCCESS: user '%s' provided valid OTP code", user);
+
     /* XXX Update state with details about the expected OTP found,
      * e.g. for clock drift, event counter increment, etc.
      *
@@ -401,6 +414,8 @@ static int handle_user_otp(pool *p, const char *user, const char *user_otp,
   pr_memscrub((char *) secret, secret_len);
 
   if (authoritative) {
+    (void) pr_log_writefile(auth_otp_logfd, MOD_AUTH_OTP_VERSION,
+      "FAILED: user '%s' provided invalid OTP code", user);
     auth_otp_auth_code = PR_AUTH_BADPWD;
     return -1;
   }
