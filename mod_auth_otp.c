@@ -245,7 +245,7 @@ static int handle_user_otp(pool *p, const char *user, const char *user_otp,
     pr_trace_msg(trace_channel, 1,
       "no OTP code provided by user, rejecting");
     (void) pr_log_writefile(auth_otp_logfd, MOD_AUTH_OTP_VERSION,
-      "FAILED: user '%s' did not provide OTP code", user);
+      "FAILED: user '%s' provided invalid OTP code", user);
     auth_otp_auth_code = PR_AUTH_BADPWD;
     return -1;
   }
@@ -279,8 +279,16 @@ static int handle_user_otp(pool *p, const char *user, const char *user_otp,
     int xerrno = errno;
 
     (void) auth_otp_db_unlock(dbh);
-    pr_log_writefile(auth_otp_logfd, MOD_AUTH_OTP_VERSION,
-      "unable to retrieve OTP info for user '%s': %s", user, strerror(xerrno));
+
+    if (xerrno == ENOENT) {
+      pr_log_writefile(auth_otp_logfd, MOD_AUTH_OTP_VERSION,
+        "user '%s' has no OTP info in AuthOTPTable", user);
+
+    } else {
+      pr_log_writefile(auth_otp_logfd, MOD_AUTH_OTP_VERSION,
+        "unable to retrieve OTP info for user '%s': %s", user,
+        strerror(xerrno));
+    }
 
     /* If there was no entry found in the table (errno = ENOENT), should we
      * returned ERROR or DECLINED?
