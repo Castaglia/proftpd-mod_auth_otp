@@ -111,7 +111,8 @@ int auth_otp_hmac(const EVP_MD *md, const unsigned char *key, size_t key_len,
     return -1;
   }
 
-  if (HMAC(md, key, key_len, data, data_len, mac, mac_len) == NULL) {
+  if (HMAC(md, key, key_len, data, data_len, mac,
+      (unsigned int *) mac_len) == NULL) {
     (void) pr_log_writefile(auth_otp_logfd, MOD_AUTH_OTP_VERSION,
       "HMAC error: %s", auth_otp_crypto_get_errors());
     errno = EPERM;

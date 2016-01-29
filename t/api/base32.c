@@ -1,6 +1,6 @@
 /*
  * ProFTPD - mod_auth_otp testsuite
- * Copyright (c) 2015 The ProFTPD Project team
+ * Copyright (c) 2015-2016 The ProFTPD Project team
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,17 +73,19 @@ START_TEST (base32_encode_test) {
   register unsigned int i;
   int res;
 
-  res = auth_otp_base32_encode(p, NULL, NULL, NULL);
+  res = auth_otp_base32_encode(p, NULL, 0, NULL, NULL);
   fail_unless(res < 0, "Failed to handle null arguments");
   fail_unless(errno == EINVAL, "Expected errno %s (%d), got %s (%d)",
     strerror(EINVAL), EINVAL, strerror(errno), errno);
 
   for (i = 0; i < expected_code_count; i++) {
-    const unsigned char *encoded = NULL;
-    size_t encoded_len = 0;
+    const unsigned char *raw, *encoded = NULL;
+    size_t raw_len, encoded_len = 0;
 
-    res = auth_otp_base32_encode(p,
-      (const unsigned char *) expected_codes[i].raw, &encoded, &encoded_len);
+    raw = (const unsigned char *) expected_codes[i].raw;
+    raw_len = strlen((char *) raw);
+
+    res = auth_otp_base32_encode(p, raw, raw_len, &encoded, &encoded_len);
     fail_unless(res == 0, "Failed to base32 encode '%s': %s",
       expected_codes[i].raw, strerror(errno));
     fail_unless(strcmp((char *) encoded, expected_codes[i].encoded) == 0,
@@ -97,7 +99,7 @@ START_TEST (base32_decode_test) {
   register unsigned int i;
   int res;
 
-  res = auth_otp_base32_decode(p, NULL, NULL, NULL);
+  res = auth_otp_base32_decode(p, NULL, 0, NULL, NULL);
   fail_unless(res < 0, "Failed to handle null arguments");
   fail_unless(errno == EINVAL, "Expected errno %s (%d), got %s (%d)",
     strerror(EINVAL), EINVAL, strerror(errno), errno);
@@ -105,11 +107,13 @@ START_TEST (base32_decode_test) {
   mark_point();
 
   for (i = 0; i < expected_code_count; i++) {
-    const unsigned char *raw = NULL;
-    size_t raw_len = 0;
+    const unsigned char *encoded, *raw = NULL;
+    size_t encoded_len, raw_len = 0;
 
-    res = auth_otp_base32_decode(p,
-      (const unsigned char *) expected_codes[i].encoded, &raw, &raw_len);
+    encoded = (const unsigned char *) expected_codes[i].encoded;
+    encoded_len = strlen((char *) encoded);
+
+    res = auth_otp_base32_decode(p, encoded, encoded_len, &raw, &raw_len);
     fail_unless(res == 0, "Failed to base32 decode '%s': %s",
       expected_codes[i].encoded, strerror(errno));
     fail_unless(strcmp((char *) raw, expected_codes[i].raw) == 0,

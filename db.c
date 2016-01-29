@@ -1,6 +1,6 @@
 /*
  * ProFTPD - mod_auth_otp database storage
- * Copyright (c) 2015 TJ Saunders
+ * Copyright (c) 2015-2016 TJ Saunders
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -175,7 +175,8 @@ int auth_otp_db_user_info(pool *p, struct auth_otp_db *dbh, const char *user,
   modret_t *sql_res = NULL;
   array_header *sql_data = NULL;
   const char *select_query = NULL;
-  char **values = NULL;
+  char *encoded, **values = NULL;
+  size_t encoded_len;
   unsigned int nvalues = 0;
 
   if (dbh == NULL ||
@@ -242,7 +243,11 @@ int auth_otp_db_user_info(pool *p, struct auth_otp_db *dbh, const char *user,
   values = sql_data->elts;
 
   /* Don't forget to base32-decode the value from the database. */
-  res = auth_otp_base32_decode(p, values[0], secret, secret_len);
+  encoded = values[0];
+  encoded_len = strlen(encoded);
+
+  res = auth_otp_base32_decode(p, (const unsigned char *) encoded, encoded_len,
+    secret, secret_len);
   if (res < 0) {
     (void) pr_log_writefile(auth_otp_logfd, MOD_AUTH_OTP_VERSION,
       "error base32-decoding value from database: %s", strerror(errno));

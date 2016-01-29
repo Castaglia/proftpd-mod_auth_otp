@@ -1,6 +1,6 @@
 /*
  * ProFTPD - mod_auth_otp base32 routines
- * Copyright (c) 2015 TJ Saunders
+ * Copyright (c) 2015-2016 TJ Saunders
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,9 +28,9 @@
 #define MOD_AUTH_OTP_BASE32_H
 
 int auth_otp_base32_encode(pool *p, const unsigned char *raw,
-  const unsigned char **encoded, size_t *encoded_len);
+  size_t raw_len, const unsigned char **encoded, size_t *encoded_len);
 
 int auth_otp_base32_decode(pool *p, const unsigned char *encoded,
-  const unsigned char **raw, size_t *raw_len);
+  size_t encoded_len, const unsigned char **raw, size_t *raw_len);
 
 #endif
