@@ -379,6 +379,7 @@ EOS
 
       my $oath = Authen::OATH->new();
       my $nattempts = 5;
+      my $ok = 0;
     
       for (my $i = 0; $i < $nattempts; $i++) { 
         my $client = ProFTPD::TestSuite::FTP->new('127.0.0.1', $port);
@@ -390,9 +391,17 @@ EOS
           print STDERR "# Generated HOTP $hotp for counter $next_counter\n";
         }
 
-        $client->login($setup->{user}, $hotp);
+        eval { $client->login($setup->{user}, $hotp) };
+        if ($@) {
+          next;
+        }
+
         $client->quit();
+        $ok = 1;
+        last;
       }
+
+      $self->assert($ok, test_msg("Failed to login successfully using HOTP"));
     };
 
     if ($@) {
@@ -964,6 +973,7 @@ EOS
       my $oath = Authen::OATH->new();
       my $nattempts = 3; 
       my $now = time();
+      my $ok = 0;
 
       for (my $i = 0; $i < $nattempts; $i++) {
         my $client = ProFTPD::TestSuite::FTP->new('127.0.0.1', $port);
@@ -984,9 +994,17 @@ EOS
           print STDERR "# Generated TOTP $totp for ", scalar(localtime($ts)), "\n";
         }
 
-        $client->login($setup->{user}, $totp);
+        eval { $client->login($setup->{user}, $totp) };
+        if ($@) {
+          next;
+        }
+
         $client->quit();
+        $ok = 1;
+        last;
       }
+
+      $self->assert($ok, test_msg("Failed to login successfully using TOTP"));
     };
 
     if ($@) {

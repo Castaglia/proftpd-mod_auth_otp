@@ -795,6 +795,11 @@ static int auth_otp_init(void) {
     auth_otp_mod_unload_ev, NULL);
 #endif /* PR_SHARED_MODULE */
 
+  if (pr_module_exists("mod_sql.c") == FALSE) {
+    pr_log_pri(PR_LOG_NOTICE, MOD_AUTH_OTP_VERSION
+      ": Missing required 'mod_sql.c'; HOTP/TOTP logins will FAIL");
+  }
+
 #if defined(HAVE_SFTP)
   auth_otp_using_sftp = pr_module_exists("mod_sftp.c");
   if (auth_otp_using_sftp) {

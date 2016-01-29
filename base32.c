@@ -1,6 +1,6 @@
 /*
  * ProFTPD - mod_auth_otp base32 implementation
- * Copyright (c) 2015 TJ Saunders
+ * Copyright (c) 2015-2016 TJ Saunders
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,9 +36,9 @@
 static const unsigned char base32[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
 int auth_otp_base32_encode(pool *p, const unsigned char *raw,
-    const unsigned char **encoded, size_t *encoded_len) {
+    size_t raw_len, const unsigned char **encoded, size_t *encoded_len) {
   unsigned char *buf;
-  size_t buflen, bufsz, raw_len;
+  size_t buflen, bufsz;
 
   if (p == NULL ||
       raw == NULL ||
@@ -48,7 +48,6 @@ int auth_otp_base32_encode(pool *p, const unsigned char *raw,
     return -1;
   }
 
-  raw_len = strlen(raw);
   bufsz = (raw_len * 8) / 5 + 5;
   buf = palloc(p, bufsz);
   buflen = 0;
@@ -98,11 +97,11 @@ int auth_otp_base32_encode(pool *p, const unsigned char *raw,
 }
 
 int auth_otp_base32_decode(pool *p, const unsigned char *encoded,
-    const unsigned char **raw, size_t *raw_len) {
+    size_t encoded_len, const unsigned char **raw, size_t *raw_len) {
   register const unsigned char *ptr;
   int d;
   unsigned char *buf;
-  size_t buflen, bufsz, encoded_len;
+  size_t buflen, bufsz;
   unsigned int bits_rem;
 
   if (p == NULL ||
@@ -113,7 +112,6 @@ int auth_otp_base32_decode(pool *p, const unsigned char *encoded,
     return -1;
   }
 
-  encoded_len = strlen(encoded);
   if (encoded_len == 0) {
     /* We were given an empty string; make sure we allocate at least one
      * character, for the NUL.
