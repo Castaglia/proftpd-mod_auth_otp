@@ -53,6 +53,8 @@ static struct auth_otp_db *dbh = NULL;
 static config_rec *auth_otp_db_config = NULL;
 static int auth_otp_auth_code = PR_AUTH_BADPWD;
 
+/* Necessary prototypes */
+static int auth_otp_sess_init(void);
 static int handle_user_otp(pool *p, const char *user, const char *user_otp,
   int authoritative);
 
@@ -782,8 +784,42 @@ static void auth_otp_mod_unload_ev(const void *event_data, void *user_data) {
     pr_event_unregister(&auth_otp_module, NULL, NULL);
   }
 }
-
 #endif /* PR_SHARED_MODULE */
+
+static void auth_otp_sess_reinit_ev(const void *event_data, void *user_data) {
+  int res;
+
+  /* A HOST command changed the main_server pointer; reinitialize ourselves. */
+
+  pr_event_unregister(&auth_otp_module, "core.exit", auth_otp_exit_ev);
+  pr_event_unregister(&auth_otp_module, "core.session-reinit",
+    auth_otp_sess_reinit_ev);
+
+  auth_otp_engine = FALSE;
+  auth_otp_opts = 0UL;
+  auth_otp_algo = AUTH_OTP_ALGO_TOTP_SHA1;
+  auth_otp_db_config = NULL;
+
+  if (auth_otp_logfd >= 0) {
+    (void) close(auth_otp_logfd);
+    auth_otp_logfd = -1;
+  }
+
+#if defined(HAVE_SFTP)
+  auth_otp_using_sftp = FALSE;
+  (void) sftp_kbdint_register_driver("auth_otp", &auth_otp_kbdint_driver);
+#endif /* HAVE_SFTP */
+
+  if (auth_otp_pool != NULL) {
+    destroy_pool(auth_otp_pool);
+  }
+
+  res = auth_otp_sess_init();
+  if (res < 0) {
+    pr_session_disconnect(&auth_otp_module,
+      PR_SESS_DISCONNECT_SESSION_INIT_FAILED, NULL);
+  }
+}
 
 /* Initialization routines
  */
@@ -831,6 +867,19 @@ static int auth_otp_init(void) {
 
 static int auth_otp_sess_init(void) {
   config_rec *c;
+
+  pr_event_register(&auth_otp_module, "core.session-reinit",
+    auth_otp_sess_reinit_ev, NULL);
+
+  if (pr_auth_add_auth_only_module("mod_auth_otp.c") < 0 &&
+      errno != EEXIST) {
+    pr_log_pri(PR_LOG_NOTICE, MOD_AUTH_OTP_VERSION
+      ": unable to add 'mod_auth_otp.c' as an auth-only module: %s",
+      strerror(errno));
+
+    errno = EPERM;
+    return -1;
+  }
 
   /* XXX Can we handle both FTP and SSH2 connections in the same module? */
 
@@ -921,13 +970,6 @@ static int auth_otp_sess_init(void) {
     auth_otp_opts |= opts;
 
     c = find_config_next(c, c->next, CONF_PARAM, "AuthOTPOptions", FALSE);
-  }
-
-  if (pr_auth_add_auth_only_module("mod_auth_otp.c") < 0) {
-    pr_log_pri(PR_LOG_NOTICE, MOD_AUTH_OTP_VERSION
-      ": unable to add 'mod_auth_otp.c' as an auth-only module: %s",
-      strerror(errno));
-    return -1;
   }
 
   pr_event_register(&auth_otp_module, "core.exit", auth_otp_exit_ev, NULL);
