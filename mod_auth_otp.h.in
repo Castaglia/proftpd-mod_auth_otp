@@ -44,6 +44,7 @@
 # error "ProFTPD 1.3.4rc2 or later required"
 #endif
 
+#include <openssl/conf.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 #include <openssl/err.h>

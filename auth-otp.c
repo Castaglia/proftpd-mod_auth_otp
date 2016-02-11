@@ -46,9 +46,7 @@
 # include <netinet/in.h>
 #endif
 
-#include <openssl/conf.h>
-#include <openssl/err.h>
-
+#include "mod_auth_otp.h"
 #include "pool.h"
 #include "base32.h"
 #include "crypto.h"
